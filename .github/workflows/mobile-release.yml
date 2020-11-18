@@ -1,26 +1,77 @@
-name: CICD 
-
-on:
+name: CI/CD Mobile and Web
+'on':
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
-
+    branches:
+      - master
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  ios-driven:
+    name: Build ios
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Print Dart SDK version
-        run: flutter --version
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Analyze project source
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 12.x
+      - uses: subosito/flutter-action@v1
+#        with:
+#          flutter-version: 1.0.x
+      - run: flutter channel dev
+      - run: flutter doctor
+      - run: flutter pub get
+      - run: flutter test
+      - run: flutter build apk --debug --split-per-abi
+      - run: flutter build ios --no-codesign
+      - name: Create a Release APK
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: build/app/outputs/apk/debug/*.apk
+          token: '${{ secrets.GITHUB_TOKEN }}'
+      - uses: actions/upload-artifact@v1
+        with:
+          name: web-build
+          path: build/web
+  android-driven:
+    name: Build android
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 12.x
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: 1.0.x
+      - run: flutter channel dev
+      - run: flutter doctor
+#      - run: flutter pub get
+#      - run: flutter test
+      - run: flutter build apk --debug --split-per-abi
+      - run: flutter build appbundle
+      - name: Create a Release APK
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: build/app/outputs/apk/debug/*.apk
+          token: '${{ secrets.GITHUB_TOKEN }}'
+      - uses: actions/upload-artifact@v1
+        with:
+          name: web-build
+          path: build/web
+  web-driven:
+    name: Build web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 12.x
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: beta
+      - run: flutter config --enable-web
+      - run: flutter pub get
+#      - run: flutter test
+      - run: flutter build web
+      - uses: erickzanardo/flutter-gh-pages@v2

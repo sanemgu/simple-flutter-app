@@ -18,6 +18,9 @@ on:
   push:
     tags:
     - '*'
+    branches:
+    - master
+    - develop
 
 jobs:
 

@@ -39,9 +39,9 @@ jobs:
 #      env:
 #        PREVIOUS_TAG: ${{ steps.version.outputs.previous_tag }}
 #      run: echo "$PREVIOUS_TAG"
-      - name: GitVersion
-        id: gitversion  # step id used as reference for output values
-        uses: roryprimrose/rungitversion@v1
-      - name: Dump version values
-        run: |
-            echo "SemVer: ${{ steps.gitversion.outputs.SemVer }}"
+    - name: GitVersion
+      id: gitversion  # step id used as reference for output values
+      uses: roryprimrose/rungitversion@v1
+    - name: Dump version values
+      run: |
+        echo "SemVer: ${{ steps.gitversion.outputs.SemVer }}"

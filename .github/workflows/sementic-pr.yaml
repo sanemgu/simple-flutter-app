@@ -1,14 +1,38 @@
-name: "Semantic PR"
+#name: "Semantic PR"
+#on:
+#  pull_request_target:
+#    types:
+#      - opened
+#      - edited
+#      - synchronize
+#jobs:
+#  version:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: amannn/action-semantic-pull-request@v1.2.0
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+name: Semantic Version
+
 on:
-  pull_request_target:
-    types:
-      - opened
-      - edited
-      - synchronize
+  push:
+    tags:
+    - '*'
+
 jobs:
-  version:
+
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: amannn/action-semantic-pull-request@v1.2.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v1
+    - name: Process version of the tag
+      id: version
+      uses: ncipollo/semantic-version-action@v1
+    - name: Dump steps context
+      env:
+        STEPS_CONTEXT: ${{ toJson(steps.version.outputs) }}
+      run: echo "$STEPS_CONTEXT"
+    - name: Dump previous tag
+      env:
+        PREVIOUS_TAG: ${{ steps.version.outputs.previous_tag }}
+      run: echo "$PREVIOUS_TAG"
